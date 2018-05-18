@@ -30,7 +30,7 @@ contract Permissions {
     globalNodeIndex = 0;
   }
   // Checks if the Node is already added. If yes then returns true
-  function checkIfNodeExists (string _enodeId) internal view  returns (NodeStatus _status, uint _nodeIndex){
+  function checkIfNodeExists (string _enodeId) internal view returns (NodeStatus _status, uint _nodeIndex){
 
     _status = NodeStatus.NotInList;
     _nodeIndex = 0;
@@ -78,7 +78,7 @@ contract Permissions {
   }
 
   //deactivates a given Enode and emits the decativation event
-  function DeactivateNode (string _enodeId)  public {
+  function DeactivateNode (string _enodeId) public {
     uint nodeIndex = 0;
     NodeStatus status = NodeStatus.NotInList;
     (status, nodeIndex) = checkIfNodeExists(_enodeId);
