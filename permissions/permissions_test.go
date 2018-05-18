@@ -2,6 +2,7 @@ package permissions
 
 import (
 	"fmt"
+	"math/big"
 	"strings"
 	"testing"
 
@@ -14,7 +15,7 @@ const key = `{"address":"ed9d02e382b34818e88b88a309c7fe71e65f419d","crypto":{"ci
 
 const enode1 = "ac6b1096ca56b9f6d004b779ae3728bf83f8e22453404cc3cef16a3d9b96608bc67c4b30db88e0a5a6c6390213f7acbe1153ff6d23ce57380104288ae19373ef"
 const enode2 = "0ba6b9f606a43a95edc6247cdb1c1e105145817be7bcafd6b2c0ba15d58145f0dc1a194f70ba73cd6f4cdd6864edc7687f311254c7555cc32e4d45aeb1b80416"
-const addr = "0xd9d64b7dc034fafdba5dc2902875a67b5d586420"
+const addr = "0xfe0602d820f42800e3ef3f89e1c39cd15f78d283"
 
 func TestContract_ProposeNode(t *testing.T) {
 	conn, err := ethclient.Dial("/home/vagrant/quorum-examples/examples/7nodes/qdata/dd1/geth.ipc")
@@ -33,7 +34,20 @@ func TestContract_ProposeNode(t *testing.T) {
 		t.Errorf("Failed to create authorized transactor: %v", err)
 	}
 
-	tx, err := permissions.ProposeNode(auth, enode2, true, true)
+	session := &PermissionsSession{
+		Contract: permissions,
+		CallOpts: bind.CallOpts{
+			Pending: true,
+		},
+		TransactOpts: bind.TransactOpts{
+			From:     auth.From,
+			Signer:   auth.Signer,
+			GasLimit: big.NewInt(3558096384),
+			GasPrice: big.NewInt(0),
+		},
+	}
+
+	tx, err := session.ProposeNode(enode1, true, true)
 	if err != nil {
 		t.Errorf("Failed to propose node: %v", err)
 	}
@@ -53,7 +67,7 @@ func TestContract_GetNodeIndexForNode(t *testing.T) {
 		t.Errorf("Failed to instantiate a Permissions contract: %v", err)
 	}
 
-	nodeIndex, err := permissions.GetNodeIndexForNode(nil, enode2)
+	nodeIndex, err := permissions.GetNodeIndexForNode(nil, enode1)
 
 	if err != nil {
 		t.Errorf("Failed to create authorized transactor: %v", err)
