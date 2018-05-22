@@ -29,6 +29,8 @@ type Argument struct {
 	Indexed bool // indexed is only used by events
 }
 
+type Arguments []Argument
+
 func (a *Argument) UnmarshalJSON(data []byte) error {
 	var extarg struct {
 		Name    string

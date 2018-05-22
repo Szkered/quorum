@@ -28,13 +28,14 @@ func DeployENS(auth *bind.TransactOpts, backend bind.ContractBackend, owner comm
 	if err != nil {
 		return common.Address{}, nil, nil, err
 	}
-	return address, tx, &ENS{ENSCaller: ENSCaller{contract: contract}, ENSTransactor: ENSTransactor{contract: contract}}, nil
+	return address, tx, &ENS{ENSCaller: ENSCaller{contract: contract}, ENSTransactor: ENSTransactor{contract: contract}, ENSFilterer: ENSFilterer{contract: contract}}, nil
 }
 
 // ENS is an auto generated Go binding around an Ethereum contract.
 type ENS struct {
 	ENSCaller     // Read-only binding to the contract
 	ENSTransactor // Write-only binding to the contract
+	ENSFilterer   // Log filterer for contract events
 }
 
 // ENSCaller is an auto generated read-only Go binding around an Ethereum contract.
@@ -45,6 +46,11 @@ type ENSCaller struct {
 // ENSTransactor is an auto generated write-only Go binding around an Ethereum contract.
 type ENSTransactor struct {
 	contract *bind.BoundContract // Generic contract wrapper for the low level calls
+}
+
+// ENSFilterer is an auto generated log filtering Go binding around an Ethereum contract events.
+type ENSFilterer struct {
+        contract *bind.BoundContract // Generic contract wrapper for the low level calls
 }
 
 // ENSSession is an auto generated Go binding around an Ethereum contract,
@@ -86,16 +92,16 @@ type ENSTransactorRaw struct {
 
 // NewENS creates a new instance of ENS, bound to a specific deployed contract.
 func NewENS(address common.Address, backend bind.ContractBackend) (*ENS, error) {
-	contract, err := bindENS(address, backend, backend)
+	contract, err := bindENS(address, backend, backend, backend)
 	if err != nil {
 		return nil, err
 	}
-	return &ENS{ENSCaller: ENSCaller{contract: contract}, ENSTransactor: ENSTransactor{contract: contract}}, nil
+	return &ENS{ENSCaller: ENSCaller{contract: contract}, ENSTransactor: ENSTransactor{contract: contract}, ENSFilterer: ENSFilterer{contract: contract}}, nil
 }
 
 // NewENSCaller creates a new read-only instance of ENS, bound to a specific deployed contract.
 func NewENSCaller(address common.Address, caller bind.ContractCaller) (*ENSCaller, error) {
-	contract, err := bindENS(address, caller, nil)
+	contract, err := bindENS(address, caller, nil, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -104,20 +110,29 @@ func NewENSCaller(address common.Address, caller bind.ContractCaller) (*ENSCalle
 
 // NewENSTransactor creates a new write-only instance of ENS, bound to a specific deployed contract.
 func NewENSTransactor(address common.Address, transactor bind.ContractTransactor) (*ENSTransactor, error) {
-	contract, err := bindENS(address, nil, transactor)
+	contract, err := bindENS(address, nil, transactor, nil)
 	if err != nil {
 		return nil, err
 	}
 	return &ENSTransactor{contract: contract}, nil
 }
 
+// NewENSFilterer creates a new log filterer instance of ENS, bound to a specific deployed contract.
+func NewENSFilterer(address common.Address, filterer bind.ContractFilterer) (*ENSFilterer, error) {
+        contract, err := bindENS(address, nil, nil, filterer)
+        if err != nil {
+                return nil, err
+        }
+        return &ENSFilterer{contract: contract}, nil
+}
+
 // bindENS binds a generic wrapper to an already deployed contract.
-func bindENS(address common.Address, caller bind.ContractCaller, transactor bind.ContractTransactor) (*bind.BoundContract, error) {
+func bindENS(address common.Address, caller bind.ContractCaller, transactor bind.ContractTransactor, filterer bind.ContractFilterer) (*bind.BoundContract, error) {
 	parsed, err := abi.JSON(strings.NewReader(ENSABI))
 	if err != nil {
 		return nil, err
 	}
-	return bind.NewBoundContract(address, parsed, caller, transactor), nil
+	return bind.NewBoundContract(address, parsed, caller, transactor, filterer), nil
 }
 
 // Call invokes the (constant) contract method with params as input values and
@@ -347,7 +362,7 @@ type FIFSRegistrarTransactorRaw struct {
 
 // NewFIFSRegistrar creates a new instance of FIFSRegistrar, bound to a specific deployed contract.
 func NewFIFSRegistrar(address common.Address, backend bind.ContractBackend) (*FIFSRegistrar, error) {
-	contract, err := bindFIFSRegistrar(address, backend, backend)
+	contract, err := bindFIFSRegistrar(address, backend, backend, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -356,7 +371,7 @@ func NewFIFSRegistrar(address common.Address, backend bind.ContractBackend) (*FI
 
 // NewFIFSRegistrarCaller creates a new read-only instance of FIFSRegistrar, bound to a specific deployed contract.
 func NewFIFSRegistrarCaller(address common.Address, caller bind.ContractCaller) (*FIFSRegistrarCaller, error) {
-	contract, err := bindFIFSRegistrar(address, caller, nil)
+	contract, err := bindFIFSRegistrar(address, caller, nil, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -365,7 +380,7 @@ func NewFIFSRegistrarCaller(address common.Address, caller bind.ContractCaller) 
 
 // NewFIFSRegistrarTransactor creates a new write-only instance of FIFSRegistrar, bound to a specific deployed contract.
 func NewFIFSRegistrarTransactor(address common.Address, transactor bind.ContractTransactor) (*FIFSRegistrarTransactor, error) {
-	contract, err := bindFIFSRegistrar(address, nil, transactor)
+	contract, err := bindFIFSRegistrar(address, nil, transactor, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -373,12 +388,12 @@ func NewFIFSRegistrarTransactor(address common.Address, transactor bind.Contract
 }
 
 // bindFIFSRegistrar binds a generic wrapper to an already deployed contract.
-func bindFIFSRegistrar(address common.Address, caller bind.ContractCaller, transactor bind.ContractTransactor) (*bind.BoundContract, error) {
+func bindFIFSRegistrar(address common.Address, caller bind.ContractCaller, transactor bind.ContractTransactor, filterer bind.ContractFilterer) (*bind.BoundContract, error) {
 	parsed, err := abi.JSON(strings.NewReader(FIFSRegistrarABI))
 	if err != nil {
 		return nil, err
 	}
-	return bind.NewBoundContract(address, parsed, caller, transactor), nil
+	return bind.NewBoundContract(address, parsed, caller, transactor, filterer), nil
 }
 
 // Call invokes the (constant) contract method with params as input values and
@@ -514,7 +529,7 @@ type PublicResolverTransactorRaw struct {
 
 // NewPublicResolver creates a new instance of PublicResolver, bound to a specific deployed contract.
 func NewPublicResolver(address common.Address, backend bind.ContractBackend) (*PublicResolver, error) {
-	contract, err := bindPublicResolver(address, backend, backend)
+	contract, err := bindPublicResolver(address, backend, backend, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -523,7 +538,7 @@ func NewPublicResolver(address common.Address, backend bind.ContractBackend) (*P
 
 // NewPublicResolverCaller creates a new read-only instance of PublicResolver, bound to a specific deployed contract.
 func NewPublicResolverCaller(address common.Address, caller bind.ContractCaller) (*PublicResolverCaller, error) {
-	contract, err := bindPublicResolver(address, caller, nil)
+	contract, err := bindPublicResolver(address, caller, nil, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -532,7 +547,7 @@ func NewPublicResolverCaller(address common.Address, caller bind.ContractCaller)
 
 // NewPublicResolverTransactor creates a new write-only instance of PublicResolver, bound to a specific deployed contract.
 func NewPublicResolverTransactor(address common.Address, transactor bind.ContractTransactor) (*PublicResolverTransactor, error) {
-	contract, err := bindPublicResolver(address, nil, transactor)
+	contract, err := bindPublicResolver(address, nil, transactor, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -540,12 +555,12 @@ func NewPublicResolverTransactor(address common.Address, transactor bind.Contrac
 }
 
 // bindPublicResolver binds a generic wrapper to an already deployed contract.
-func bindPublicResolver(address common.Address, caller bind.ContractCaller, transactor bind.ContractTransactor) (*bind.BoundContract, error) {
+func bindPublicResolver(address common.Address, caller bind.ContractCaller, transactor bind.ContractTransactor, filterer bind.ContractFilterer) (*bind.BoundContract, error) {
 	parsed, err := abi.JSON(strings.NewReader(PublicResolverABI))
 	if err != nil {
 		return nil, err
 	}
-	return bind.NewBoundContract(address, parsed, caller, transactor), nil
+	return bind.NewBoundContract(address, parsed, caller, transactor, filterer), nil
 }
 
 // Call invokes the (constant) contract method with params as input values and
@@ -775,7 +790,7 @@ type ResolverTransactorRaw struct {
 
 // NewResolver creates a new instance of Resolver, bound to a specific deployed contract.
 func NewResolver(address common.Address, backend bind.ContractBackend) (*Resolver, error) {
-	contract, err := bindResolver(address, backend, backend)
+	contract, err := bindResolver(address, backend, backend, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -784,7 +799,7 @@ func NewResolver(address common.Address, backend bind.ContractBackend) (*Resolve
 
 // NewResolverCaller creates a new read-only instance of Resolver, bound to a specific deployed contract.
 func NewResolverCaller(address common.Address, caller bind.ContractCaller) (*ResolverCaller, error) {
-	contract, err := bindResolver(address, caller, nil)
+	contract, err := bindResolver(address, caller, nil, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -793,7 +808,7 @@ func NewResolverCaller(address common.Address, caller bind.ContractCaller) (*Res
 
 // NewResolverTransactor creates a new write-only instance of Resolver, bound to a specific deployed contract.
 func NewResolverTransactor(address common.Address, transactor bind.ContractTransactor) (*ResolverTransactor, error) {
-	contract, err := bindResolver(address, nil, transactor)
+	contract, err := bindResolver(address, nil, transactor, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -801,12 +816,12 @@ func NewResolverTransactor(address common.Address, transactor bind.ContractTrans
 }
 
 // bindResolver binds a generic wrapper to an already deployed contract.
-func bindResolver(address common.Address, caller bind.ContractCaller, transactor bind.ContractTransactor) (*bind.BoundContract, error) {
+func bindResolver(address common.Address, caller bind.ContractCaller, transactor bind.ContractTransactor, filterer bind.ContractFilterer) (*bind.BoundContract, error) {
 	parsed, err := abi.JSON(strings.NewReader(ResolverABI))
 	if err != nil {
 		return nil, err
 	}
-	return bind.NewBoundContract(address, parsed, caller, transactor), nil
+	return bind.NewBoundContract(address, parsed, caller, transactor, filterer), nil
 }
 
 // Call invokes the (constant) contract method with params as input values and
