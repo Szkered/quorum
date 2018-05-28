@@ -74,7 +74,8 @@ func NewSimulatedBackend(alloc core.GenesisAlloc) *SimulatedBackend {
 		database:   database, 
 		blockchain: blockchain, 
 		config:		genesis.Config,
-		events: 		filters.NewEventSystem(new(event.TypeMux), &filterBackend{database, blockchain}, false),}
+		events: 	filters.NewEventSystem(new(event.TypeMux), &filterBackend{database, blockchain}, false),
+	}
 	backend.rollback()
 	return backend
 }
@@ -245,7 +246,7 @@ func (b *SimulatedBackend) EstimateGas(ctx context.Context, call ethereum.CallMs
 	return new(big.Int).SetUint64(hi), nil
 }
 
-// callContract implemens common code between normal and pending contract calls.
+// callContract implements common code between normal and pending contract calls.
 // state is modified during execution, make sure to copy it if necessary.
 func (b *SimulatedBackend) callContract(ctx context.Context, call ethereum.CallMsg, block *types.Block, statedb, privateState *state.StateDB) ([]byte, *big.Int, bool, error) {
 	// Ensure message is initialized properly.
@@ -304,61 +305,61 @@ func (b *SimulatedBackend) SendTransaction(ctx context.Context, tx *types.Transa
 //
 // TODO(karalabe): Deprecate when the subscription one can return past data too.
 func (b *SimulatedBackend) FilterLogs(ctx context.Context, query ethereum.FilterQuery) ([]types.Log, error) {
-    // Initialize unset filter boundaried to run from genesis to chain head
-    from := int64(0)
-    if query.FromBlock != nil {
-        from = query.FromBlock.Int64()
-    }
-    to := int64(-1)
-    if query.ToBlock != nil {
-        to = query.ToBlock.Int64()
-    }
-    // Construct and execute the filter
-    filter := filters.New(&filterBackend{b.database, b.blockchain}, from, to, query.Addresses, query.Topics)
+		// Initialize unset filter boundaried to run from genesis to chain head
+		from := int64(0)
+		if query.FromBlock != nil {
+			from = query.FromBlock.Int64()
+		}
+		to := int64(-1)
+		if query.ToBlock != nil {
+			to = query.ToBlock.Int64()
+		}
+		// Construct and execute the filter
+		filter := filters.New(&filterBackend{b.database, b.blockchain}, from, to, query.Addresses, query.Topics)
 
-    logs, err := filter.Logs(ctx)
-    if err != nil {
-        return nil, err
-    }
-    res := make([]types.Log, len(logs))
-    for i, log := range logs {
-        res[i] = *log
-    }
-    return res, nil
+		logs, err := filter.Logs(ctx)
+		if err != nil {
+			return nil, err
+		}
+		res := make([]types.Log, len(logs))
+		for i, log := range logs {
+			res[i] = *log
+		}
+		return res, nil
 }
 
 // SubscribeFilterLogs creates a background log filtering operation, returning a
 // subscription immediately, which can be used to stream the found events.
 func (b *SimulatedBackend) SubscribeFilterLogs(ctx context.Context, query ethereum.FilterQuery, ch chan<- types.Log) (ethereum.Subscription, error) {
     // Subscribe to contract events
-    sink := make(chan []*types.Log)
+sink := make(chan []*types.Log)
 
-    sub, err := b.events.SubscribeLogs(query, sink)
-    if err != nil {
-        return nil, err
-    }
-    // Since we're getting logs in batches, we need to flatten them into a plain stream
-    return event.NewSubscription(func(quit <-chan struct{}) error {
-        defer sub.Unsubscribe()
-        for {
-            select {
-            case logs := <-sink:
-                for _, log := range logs {
-                    select {
-                    case ch <- *log:
-                    case err := <-sub.Err():
-                        return err
-                    case <-quit:
-                        return nil
-                    }
-                }
-            case err := <-sub.Err():
-                return err
-            case <-quit:
-                return nil
-            }
-        }
-    }), nil
+sub, err := b.events.SubscribeLogs(query, sink)
+if err != nil {
+return nil, err
+}
+// Since we're getting logs in batches, we need to flatten them into a plain stream
+return event.NewSubscription(func(quit <-chan struct{}) error {
+		defer sub.Unsubscribe()
+		for {
+				select {
+				case logs := <-sink:
+						for _, log := range logs {
+								select {
+								case ch <- *log:
+								case err := <-sub.Err():
+									return err
+								case <-quit:
+									return nil
+								}
+					}
+				case err := <-sub.Err():
+					return err
+				case <-quit:
+					return nil
+				}
+			}
+		}), nil
 }
 
 // JumpTimeInSeconds adds skip seconds to the clock
@@ -402,32 +403,32 @@ func (fb *filterBackend) ChainDb() ethdb.Database  { return fb.db }
 func (fb *filterBackend) EventMux() *event.TypeMux { panic("not supported") }
 
 func (fb *filterBackend) HeaderByNumber(ctx context.Context, block rpc.BlockNumber) (*types.Header, error) {
-    if block == rpc.LatestBlockNumber {
-        return fb.bc.CurrentHeader(), nil
-    }
-    return fb.bc.GetHeaderByNumber(uint64(block.Int64())), nil
+		if block == rpc.LatestBlockNumber {
+			return fb.bc.CurrentHeader(), nil
+		}
+		return fb.bc.GetHeaderByNumber(uint64(block.Int64())), nil
 }
 func (fb *filterBackend) GetReceipts(ctx context.Context, hash common.Hash) (types.Receipts, error) {
-    return core.GetBlockReceipts(fb.db, hash, core.GetBlockNumber(fb.db, hash)), nil
+	return core.GetBlockReceipts(fb.db, hash, core.GetBlockNumber(fb.db, hash)), nil
 }
 
 func (fb *filterBackend) SubscribeTxPreEvent(ch chan<- core.TxPreEvent) event.Subscription {
     return event.NewSubscription(func(quit <-chan struct{}) error {
-        <-quit
-        return nil
-    })
+		<-quit
+		return nil
+		})
 }
 func (fb *filterBackend) SubscribeChainEvent(ch chan<- core.ChainEvent) event.Subscription {
-    return fb.bc.SubscribeChainEvent(ch)
+	return fb.bc.SubscribeChainEvent(ch)
 }
 func (fb *filterBackend) SubscribeRemovedLogsEvent(ch chan<- core.RemovedLogsEvent) event.Subscription {
-    return fb.bc.SubscribeRemovedLogsEvent(ch)
+	return fb.bc.SubscribeRemovedLogsEvent(ch)
 }
 func (fb *filterBackend) SubscribeLogsEvent(ch chan<- []*types.Log) event.Subscription {
-    return fb.bc.SubscribeLogsEvent(ch)
+	return fb.bc.SubscribeLogsEvent(ch)
 }
 
 func (fb *filterBackend) BloomStatus() (uint64, uint64) { return 4096, 0 }
 func (fb *filterBackend) ServiceFilter(ctx context.Context, ms *bloombits.MatcherSession) {
-    panic("not supported")
+	panic("not supported")
 }

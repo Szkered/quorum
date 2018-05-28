@@ -59,17 +59,17 @@ type TransactOpts struct {
 // FilterOpts is the collection of options to fine tune filtering for events
 // within a bound contract.
 type FilterOpts struct {
-        Start uint64  // Start of the queried range
-        End   *uint64 // End of the range (nil = latest)
+	Start uint64  // Start of the queried range
+	End   *uint64 // End of the range (nil = latest)
 
-        Context context.Context // Network context to support cancellation and timeouts (nil = no timeout)
+	Context context.Context // Network context to support cancellation and timeouts (nil = no timeout)
 }
 
 // WatchOpts is the collection of options to fine tune subscribing for events
 // within a bound contract.
 type WatchOpts struct {
-        Start   *uint64         // Start of the queried range (nil = latest)
-        Context context.Context // Network context to support cancellation and timeouts (nil = no timeout)
+	Start   *uint64         // Start of the queried range (nil = latest)
+	Context context.Context // Network context to support cancellation and timeouts (nil = no timeout)
 }
 
 // BoundContract is the base wrapper object that reflects a contract on the
@@ -248,96 +248,96 @@ func (c *BoundContract) transact(opts *TransactOpts, contract *common.Address, i
 // channels to construct a strongly typed bound iterator on top of them.
 func (c *BoundContract) FilterLogs(opts *FilterOpts, name string, query ...[]interface{}) (chan types.Log, event.Subscription, error) {
         // Don't crash on a lazy user
-        if opts == nil {
-                opts = new(FilterOpts)
-        }
-        // Append the event selector to the query parameters and construct the topic set
-        query = append([][]interface{}{{c.abi.Events[name].Id()}}, query...)
+	if opts == nil {
+		opts = new(FilterOpts)
+	}
+	// Append the event selector to the query parameters and construct the topic set
+	query = append([][]interface{}{{c.abi.Events[name].Id()}}, query...)
 
-        topics, err := makeTopics(query...)
-        if err != nil {
-                return nil, nil, err
-        }
-        // Start the background filtering
-        logs := make(chan types.Log, 128)
+	topics, err := makeTopics(query...)
+	if err != nil {
+		return nil, nil, err
+	}
+// Start the background filtering
+	logs := make(chan types.Log, 128)
 
-        config := ethereum.FilterQuery{
-                Addresses: []common.Address{c.address},
-                Topics:    topics,
-                FromBlock: new(big.Int).SetUint64(opts.Start),
-        }
-        if opts.End != nil {
-                config.ToBlock = new(big.Int).SetUint64(*opts.End)
-        }
-        /* TODO(karalabe): Replace the rest of the method below with this when supported
-        sub, err := c.filterer.SubscribeFilterLogs(ensureContext(opts.Context), config, logs)
-        */
-        buff, err := c.filterer.FilterLogs(ensureContext(opts.Context), config)
-        if err != nil {
-                return nil, nil, err
-        }
-        sub, err := event.NewSubscription(func(quit <-chan struct{}) error {
-                for _, log := range buff {
-                        select {
-                        case logs <- log:
-                        case <-quit:
-                                return nil
-                        }
-                }
-                return nil
-        }), nil
+	config := ethereum.FilterQuery{
+			Addresses: []common.Address{c.address},
+			Topics:    topics,
+			FromBlock: new(big.Int).SetUint64(opts.Start),
+	}
+	if opts.End != nil {
+		config.ToBlock = new(big.Int).SetUint64(*opts.End)
+	}
+/* TODO(karalabe): Replace the rest of the method below with this when supported
+sub, err := c.filterer.SubscribeFilterLogs(ensureContext(opts.Context), config, logs)
+*/
+	buff, err := c.filterer.FilterLogs(ensureContext(opts.Context), config)
+	if err != nil {
+		return nil, nil, err
+	}
+	sub, err := event.NewSubscription(func(quit <-chan struct{}) error {
+		for _, log := range buff {
+			select {
+				case logs <- log:
+				case <-quit:
+					return nil
+			}
+		}
+		return nil
+	}), nil
 
-        if err != nil {
-                return nil, nil, err
-        }
-        return logs, sub, nil
+	if err != nil {
+		return nil, nil, err
+	}
+	return logs, sub, nil
 }
 
 // WatchLogs filters subscribes to contract logs for future blocks, returning a
 // subscription object that can be used to tear down the watcher.
 func (c *BoundContract) WatchLogs(opts *WatchOpts, name string, query ...[]interface{}) (chan types.Log, event.Subscription, error) {
         // Don't crash on a lazy user
-        if opts == nil {
-                opts = new(WatchOpts)
-        }
-        // Append the event selector to the query parameters and construct the topic set
-        query = append([][]interface{}{{c.abi.Events[name].Id()}}, query...)
+	if opts == nil {
+		opts = new(WatchOpts)
+	}
+	// Append the event selector to the query parameters and construct the topic set
+	query = append([][]interface{}{{c.abi.Events[name].Id()}}, query...)
 
-        topics, err := makeTopics(query...)
-        if err != nil {
-                return nil, nil, err
-        }
-        // Start the background filtering
-        logs := make(chan types.Log, 128)
+	topics, err := makeTopics(query...)
+	if err != nil {
+		return nil, nil, err
+	}
+	// Start the background filtering
+	logs := make(chan types.Log, 128)
 
-        config := ethereum.FilterQuery{
-                Addresses: []common.Address{c.address},
-                Topics:    topics,
-        }
-        if opts.Start != nil {
-                config.FromBlock = new(big.Int).SetUint64(*opts.Start)
-        }
-        sub, err := c.filterer.SubscribeFilterLogs(ensureContext(opts.Context), config, logs)
-        if err != nil {
-                return nil, nil, err
-        }
-        return logs, sub, nil
+	config := ethereum.FilterQuery{
+		Addresses: []common.Address{c.address},
+		Topics:    topics,
+	}
+	if opts.Start != nil {
+		config.FromBlock = new(big.Int).SetUint64(*opts.Start)
+	}
+	sub, err := c.filterer.SubscribeFilterLogs(ensureContext(opts.Context), config, logs)
+	if err != nil {
+		return nil, nil, err
+	}
+	return logs, sub, nil
 }
 
 // UnpackLog unpacks a retrieved log into the provided output structure.
 func (c *BoundContract) UnpackLog(out interface{}, event string, log types.Log) error {
-        if len(log.Data) > 0 {
-                if err := c.abi.Unpack(out, event, log.Data); err != nil {
-                        return err
-                }
-        }
-        var indexed abi.Arguments
-        for _, arg := range c.abi.Events[event].Inputs {
-                if arg.Indexed {
-                        indexed = append(indexed, arg)
-                }
-        }
-        return parseTopics(out, indexed, log.Topics[1:])
+	if len(log.Data) > 0 {
+		if err := c.abi.Unpack(out, event, log.Data); err != nil {
+			return err
+		}
+	}
+	var indexed abi.Arguments
+	for _, arg := range c.abi.Events[event].Inputs {
+		if arg.Indexed {
+			indexed = append(indexed, arg)
+		}
+	}
+	return parseTopics(out, indexed, log.Topics[1:])
 }
 
 // ensureContext is a helper method to ensure a context is not nil, even if the

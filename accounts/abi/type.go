@@ -29,6 +29,7 @@ const (
 	BoolTy
 	StringTy
 	SliceTy
+	ArrayTy
 	AddressTy
 	FixedBytesTy
 	BytesTy
