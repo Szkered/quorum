@@ -24,12 +24,12 @@ import (
 	"io"
 	"os"
 	"reflect"
+	"time"
 	"unicode"
 
 	cli "gopkg.in/urfave/cli.v1"
 
 	"github.com/ethereum/go-ethereum/cmd/utils"
-	"github.com/ethereum/go-ethereum/contracts/release"
 	"github.com/ethereum/go-ethereum/dashboard"
 	"github.com/ethereum/go-ethereum/eth"
 	"github.com/ethereum/go-ethereum/node"
@@ -162,6 +162,7 @@ func makeFullNode(ctx *cli.Context) *node.Node {
 
 	if ctx.GlobalBool(utils.RaftModeFlag.Name) {
 		RegisterRaftService(stack, ctx, cfg, ethChan)
+	}
 
 	if ctx.GlobalBool(utils.DashboardEnabledFlag.Name) {
 		utils.RegisterDashboardService(stack, &cfg.Dashboard, gitCommit)
