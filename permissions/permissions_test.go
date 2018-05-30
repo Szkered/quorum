@@ -2,8 +2,8 @@ package permissions
 
 import (
 	"fmt"
-//	"math/big"
-//	"strings"
+	"math/big"
+	"strings"
 	"testing"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
@@ -15,98 +15,94 @@ const key = `{"address":"ed9d02e382b34818e88b88a309c7fe71e65f419d","crypto":{"ci
 
 const enode1 = "ac6b1096ca56b9f6d004b779ae3728bf83f8e22453404cc3cef16a3d9b96608bc67c4b30db88e0a5a6c6390213f7acbe1153ff6d23ce57380104288ae19373ef"
 const enode2 = "0ba6b9f606a43a95edc6247cdb1c1e105145817be7bcafd6b2c0ba15d58145f0dc1a194f70ba73cd6f4cdd6864edc7687f311254c7555cc32e4d45aeb1b80416"
-const addr = "0xd9d64b7dc034fafdba5dc2902875a67b5d586420"
+const addr = "0x8a5e2a6343108babed07899510fb42297938d41f"
 
-//func TestContract_ProposeNode(t *testing.T) {
-//	conn, err := ethclient.Dial("/home/vagrant/quorum-examples/examples/7nodes/qdata/dd1/geth.ipc")
-//	if err != nil {
-//		t.Errorf("Failed to connect to the Ethereum client: %v", err)
-//	}
-//
-//	var contractAddr = common.HexToAddress(addr)
-//
-//	permissions, err := NewPermissions(contractAddr, conn)
-//	if err != nil {
-//		t.Errorf("Failed to instantiate a Permissions contract: %v", err)
-//	}
-//	auth, err := bind.NewTransactor(strings.NewReader(key), "")
-//	if err != nil {
-//		t.Errorf("Failed to create authorized transactor: %v", err)
-//	}
-//
-//	session := &PermissionsSession{
-//		Contract: permissions,
-//		CallOpts: bind.CallOpts{
-//			Pending: true,
-//		},
-//		TransactOpts: bind.TransactOpts{
-//			From:     auth.From,
-//			Signer:   auth.Signer,
-//			GasLimit: big.NewInt(3558096384),
-//			GasPrice: big.NewInt(0),
-//		},
-//	}
-//
-//	tx, err := session.ProposeNode(enode1, true, true)
-//	if err != nil {
-//		t.Errorf("Failed to propose node: %v", err)
-//	}
-//	fmt.Printf("Transfer pending: 0x%x\n", tx.Hash())
-//}
-//
-//func TestContract_GetNodeIndexForNode(t *testing.T) {
-//	conn, err := ethclient.Dial("/home/vagrant/quorum-examples/examples/7nodes/qdata/dd1/geth.ipc")
-//	if err != nil {
-//		t.Errorf("Failed to connect to the Ethereum client: %v", err)
-//	}
-//
-//	var contractAddr = common.HexToAddress(addr)
-//
-//	permissions, err := NewPermissions(contractAddr, conn)
-//	if err != nil {
-//		t.Errorf("Failed to instantiate a Permissions contract: %v", err)
-//	}
-//
-//	nodeIndex, err := permissions.GetNodeIndexForNode(nil, enode1)
-//
-//	if err != nil {
-//		t.Errorf("Failed to create authorized transactor: %v", err)
-//	} else {
-//		fmt.Printf("nodeIndex: %v\n", nodeIndex)
-//	}
-//
-//}
-<<<<<<< HEAD
-=======
-//func TestContract_filterNewNodeProposed (t *testing.T) {
-//	conn, err := ethclient.Dial("/home/vagrant/quorum-examples/examples/7nodes/qdata/dd1/geth.ipc")
-//	if err != nil {
-//		t.Errorf("Failed to connect to the Ethereum client: %v", err)
-//	}
-//
-//	var contractAddr = common.HexToAddress(addr)
-//
-//	permissions, err := NewPermissionsFilterer(contractAddr, conn)
-//	if err != nil {
-//		t.Errorf("some error")
-//	} else{
-//		fmt.Printf("value is %v", permissions)
-//	}
-//
-//	opts := &bind.FilterOpts{}
-//
-//	past, err  :=  permissions.FilterNewNodeProposed( opts)
-//
-//	notEmpty := true
-//	for notEmpty {
-//		notEmpty = past.Next()
-//		if notEmpty {
-//			fmt.Println("looping log")
-//		}
-//	}
-//
-//}
->>>>>>> 997b920270795fdc8adf7afe8f34873fb8ef98c9
+func TestContract_ProposeNode(t *testing.T) {
+	conn, err := ethclient.Dial("/home/vagrant/quorum-examples/examples/7nodes/qdata/dd1/geth.ipc")
+	if err != nil {
+		t.Errorf("Failed to connect to the Ethereum client: %v", err)
+	}
+
+	var contractAddr = common.HexToAddress(addr)
+
+	permissions, err := NewPermissions(contractAddr, conn)
+	if err != nil {
+		t.Errorf("Failed to instantiate a Permissions contract: %v", err)
+	}
+	auth, err := bind.NewTransactor(strings.NewReader(key), "")
+	if err != nil {
+		t.Errorf("Failed to create authorized transactor: %v", err)
+	}
+
+	session := &PermissionsSession{
+		Contract: permissions,
+		CallOpts: bind.CallOpts{
+			Pending: true,
+		},
+		TransactOpts: bind.TransactOpts{
+			From:     auth.From,
+			Signer:   auth.Signer,
+			GasLimit: big.NewInt(3558096384),
+			GasPrice: big.NewInt(0),
+		},
+	}
+
+	tx, err := session.ProposeNode(enode1, true, true)
+	if err != nil {
+		t.Errorf("Failed to propose node: %v", err)
+	}
+	fmt.Printf("Transfer pending: 0x%x\n", tx.Hash())
+}
+
+func TestContract_GetNodeIndexForNode(t *testing.T) {
+	conn, err := ethclient.Dial("/home/vagrant/quorum-examples/examples/7nodes/qdata/dd1/geth.ipc")
+	if err != nil {
+		t.Errorf("Failed to connect to the Ethereum client: %v", err)
+	}
+
+	var contractAddr = common.HexToAddress(addr)
+
+	permissions, err := NewPermissions(contractAddr, conn)
+	if err != nil {
+		t.Errorf("Failed to instantiate a Permissions contract: %v", err)
+	}
+
+	nodeIndex, err := permissions.GetNodeIndexForNode(nil, enode1)
+
+	if err != nil {
+		t.Errorf("Failed to create authorized transactor: %v", err)
+	} else {
+		fmt.Printf("nodeIndex: %v\n", nodeIndex)
+	}
+
+}
+func TestContract_filterNewNodeProposed (t *testing.T) {
+	conn, err := ethclient.Dial("/home/vagrant/quorum-examples/examples/7nodes/qdata/dd1/geth.ipc")
+	if err != nil {
+		t.Errorf("Failed to connect to the Ethereum client: %v", err)
+	}
+
+	var contractAddr = common.HexToAddress(addr)
+
+	permissions, err := NewPermissionsFilterer(contractAddr, conn)
+	if err != nil {
+		t.Errorf("some error")
+	}
+
+	opts := &bind.FilterOpts{}
+
+	past, err  :=  permissions.FilterNewNodeProposed( opts)
+
+	notEmpty := true
+	for notEmpty {
+		notEmpty = past.Next()
+		if notEmpty {
+			fmt.Printf("Node Index -  %v, Enode Id - %v, Can Write - %v, Can Lead - %v\n", past.Event.NodeIndex, past.Event.EnodeId, past.Event.CanWrite, past.Event.CanLead)
+			fmt.Println("********************************************************")
+		}
+	}
+
+}
 func TestContract_watchNewNodeProposed(t *testing.T) {
 	conn, err := ethclient.Dial("/home/vagrant/quorum-examples/examples/7nodes/qdata/dd1/geth.ipc")
 	if err != nil {
@@ -133,11 +129,6 @@ func TestContract_watchNewNodeProposed(t *testing.T) {
 		t.Error("Failed NewNodeProposed: %v", err)
 	}
 	var newEvent *PermissionsNewNodeProposed =  <-ch
-<<<<<<< HEAD
-	fmt.Println ("found event %+v", newEvent)
-	fmt.Println ("found event %s", newEvent.EnodeId)
-	fmt.Println ("found event %v", newEvent.CanWrite)
-=======
-	fmt.Println ("found event %v", newEvent.EnodeId)
->>>>>>> 997b920270795fdc8adf7afe8f34873fb8ef98c9
+	fmt.Printf ("Found event - Node Index -  %v, Enode Id - %v, Can Write - %v, Can Lead - %v\n", newEvent.NodeIndex, newEvent.EnodeId, newEvent.CanWrite, newEvent.CanLead)
+	fmt.Println("**************************************")
 }

@@ -34,13 +34,8 @@ import (
 type Method struct {
 	Name    string
 	Const   bool
-<<<<<<< HEAD
 	Inputs  Arguments
 	Outputs Arguments
-=======
-	Inputs  []Argument
-	Outputs []Argument
->>>>>>> 997b920270795fdc8adf7afe8f34873fb8ef98c9
 }
 
 // Sig returns the methods string signature according to the ABI spec.

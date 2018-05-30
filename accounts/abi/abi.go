@@ -136,15 +136,11 @@ func (abi *ABI) UnmarshalJSON(data []byte) error {
 
 // MethodById looks up a method by the 4-byte id
 // returns nil if none found
-func (abi *ABI) MethodById(sigdata []byte) (*Method, error) {
+func (abi *ABI) MethodById(sigdata []byte) *Method {
 	for _, method := range abi.Methods {
 		if bytes.Equal(method.Id(), sigdata[:4]) {
-			return &method, nil
+			return &method
 		}
 	}
-<<<<<<< HEAD
-return nil, fmt.Errorf("no method with id: %#x", sigdata[:4])
-=======
-	return nil, fmt.Errorf("no method with id: %#x", sigdata[:4])
->>>>>>> 997b920270795fdc8adf7afe8f34873fb8ef98c9
+	return nil
 }

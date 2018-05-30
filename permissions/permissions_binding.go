@@ -4,7 +4,6 @@
 package permissions
 
 import (
-	"fmt"
 	"math/big"
 	"strings"
 
@@ -523,8 +522,6 @@ func (_Permissions *PermissionsFilterer) WatchNewNodeProposed(opts *bind.WatchOp
 			case log := <-logs:
 				// New log arrived, parse the event and forward to the user
 				event := new(PermissionsNewNodeProposed)
-				fmt.Println("found event 1 %v", event)
-				fmt.Println("found event 2 %v", log)
 				if err := _Permissions.contract.UnpackLog(event, "NewNodeProposed", log); err != nil {
 					return err
 				}
