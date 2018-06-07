@@ -414,7 +414,7 @@ func (srv *Server) Start() (err error) {
 
 	files, err := ioutil.ReadDir(filepath.Join(srv.DataDir, "keystore"))
 	if err != nil {
-		srv.log.Trace("Failed to read keystore directory: %v", err)
+		srv.log.Trace("Failed to read keystore directory: ", err)
 	}
 
 	// (zekun) HACK: here we always use the first key as transactor
@@ -425,7 +425,7 @@ func (srv *Server) Start() (err error) {
 	}
 	keyBlob, err := ioutil.ReadFile(keyPath)
 	if err != nil {
-		srv.log.Trace("Failed to read key file: %v", err)
+		srv.log.Trace("Failed to read key file: ", err)
 	}
 	n := bytes.IndexByte(keyBlob, 0)
 	key := string(keyBlob[:n])
@@ -433,11 +433,11 @@ func (srv *Server) Start() (err error) {
 	contractAddr := common.HexToAddress("0x0000000000000000000000000000000000000020") // hard coded in genesis
 	permissionsContract, err := permissions.NewPermissions(contractAddr, ipcConn)
 	if err != nil {
-		srv.log.Trace("Failed to instantiate a Permissions contract: %v", err)
+		srv.log.Trace("Failed to instantiate a Permissions contract: ", err)
 	}
 	auth, err := bind.NewTransactor(strings.NewReader(key), "")
 	if err != nil {
-		srv.log.Trace("Failed to create authorized transactor: %v", err)
+		srv.log.Trace("Failed to create authorized transactor: ", err)
 	}
 	session := &permissions.PermissionsSession{
 		Contract: permissionsContract,
@@ -455,10 +455,10 @@ func (srv *Server) Start() (err error) {
 	nodes := parsePermissionedNodes(srv.DataDir)
 	for _, node := range nodes {
 		enodeID := fmt.Sprintf("%x", node.ID[:])
-		srv.log.Debug("enode id: %v", enodeID)
+		srv.log.Debug("enode id: ", enodeID)
 		tx, err := session.ProposeNode(enodeID, true, true)
 		if err != nil {
-			srv.log.Trace("Failed to propose node: %v", err)
+			srv.log.Trace("Failed to propose node: ", err)
 		}
 		srv.log.Debug("Transaction pending: 0x%x\n", tx.Hash())
 	}
