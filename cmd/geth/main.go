@@ -18,16 +18,22 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
+	"io/ioutil"
+	"math/big"
 	"os"
+	"path/filepath"
 	"runtime"
 	"sort"
 	"strings"
 	"time"
 
 	"github.com/ethereum/go-ethereum/accounts"
+	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/accounts/keystore"
 	"github.com/ethereum/go-ethereum/cmd/utils"
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/console"
 	"github.com/ethereum/go-ethereum/eth"
 	"github.com/ethereum/go-ethereum/ethclient"
@@ -35,6 +41,8 @@ import (
 	"github.com/ethereum/go-ethereum/log"
 	"github.com/ethereum/go-ethereum/metrics"
 	"github.com/ethereum/go-ethereum/node"
+	"github.com/ethereum/go-ethereum/p2p"
+	"github.com/ethereum/go-ethereum/permissions"
 	"gopkg.in/urfave/cli.v1"
 )
 
@@ -251,6 +259,72 @@ func startNode(ctx *cli.Context, stack *node.Node) {
 	// Register wallet event handlers to open and auto-derive wallets
 	events := make(chan accounts.WalletEvent, 16)
 	stack.AccountManager().Subscribe(events)
+
+	//START - QUORUM Permissioning
+	if permissioned := ctx.GlobalBool(utils.EnableNodePermissionFlag.Name); permissioned {
+		go func() {
+			rpcClient, err := stack.Attach()
+			if err != nil {
+				utils.Fatalf("Failed to attach to self: %v", err)
+			}
+			stateReader := ethclient.NewClient(rpcClient)
+
+			datadir := ctx.GlobalString(utils.DataDirFlag.Name)
+
+			files, err := ioutil.ReadDir(filepath.Join(datadir, "keystore"))
+			if err != nil {
+				utils.Fatalf("Failed to read keystore directory: %v", err)
+			}
+
+			// (zekun) HACK: here we always use the first key as transactor
+			var keyPath string
+			for _, f := range files {
+				keyPath = f.Name()
+				break
+			}
+			keyBlob, err := ioutil.ReadFile(keyPath)
+			if err != nil {
+				utils.Fatalf("Failed to read key file: %v", err)
+			}
+			n := bytes.IndexByte(keyBlob, 0)
+			key := string(keyBlob[:n])
+
+			contractAddr := common.HexToAddress("0x0000000000000000000000000000000000000020") // hard coded in genesis
+			permissionsContract, err := permissions.NewPermissions(contractAddr, stateReader)
+			if err != nil {
+				utils.Fatalf("Failed to instantiate a Permissions contract: %v", err)
+			}
+			auth, err := bind.NewTransactor(strings.NewReader(key), "")
+			if err != nil {
+				utils.Fatalf("Failed to create authorized transactor: %v", err)
+			}
+			session := &permissions.PermissionsSession{
+				Contract: permissionsContract,
+				CallOpts: bind.CallOpts{
+					Pending: true,
+				},
+				TransactOpts: bind.TransactOpts{
+					From:     auth.From,
+					Signer:   auth.Signer,
+					GasLimit: 3558096384,
+					GasPrice: big.NewInt(0),
+				},
+			}
+
+			nodes := p2p.ParsePermissionedNodes(datadir)
+			for _, node := range nodes {
+				enodeID := fmt.Sprintf("%x", node.ID[:])
+				log.Debug("enode id: %v", enodeID)
+				tx, err := session.ProposeNode(enodeID, true, true)
+				if err != nil {
+					utils.Fatalf("Failed to propose node: %v", err)
+				}
+				log.Debug("Transaction pending: 0x%x\n", tx.Hash())
+			}
+
+		}()
+	}
+	//END - QUORUM Permissioning
 
 	go func() {
 		// Create a chain state reader for self-derivation

@@ -18,29 +18,21 @@
 package p2p
 
 import (
-	"bytes"
 	"crypto/ecdsa"
 	"errors"
 	"fmt"
-	"io/ioutil"
-	"math/big"
 	"net"
-	"path/filepath"
-	"strings"
 	"sync"
 	"time"
 
-	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/mclock"
-	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/ethereum/go-ethereum/event"
 	"github.com/ethereum/go-ethereum/log"
 	"github.com/ethereum/go-ethereum/p2p/discover"
 	"github.com/ethereum/go-ethereum/p2p/discv5"
 	"github.com/ethereum/go-ethereum/p2p/nat"
 	"github.com/ethereum/go-ethereum/p2p/netutil"
-	"github.com/ethereum/go-ethereum/permissions"
 )
 
 const (
@@ -406,62 +398,62 @@ func (srv *Server) Start() (err error) {
 	srv.log.Info("Starting P2P networking")
 
 	//START - QUORUM Permissioning
-	ipcPath := filepath.Join(srv.DataDir, "geth.ipc")
-	ipcConn, err := ethclient.Dial(ipcPath)
-	if err != nil {
-		srv.log.Trace("Failed to connect to the Ethereum client for reading permissions contract: %v", err)
-	}
+	// ipcPath := filepath.Join(srv.DataDir, "geth.ipc")
+	// ipcConn, err := ethclient.Dial(ipcPath)
+	// if err != nil {
+	// 	srv.log.Trace("Failed to connect to the Ethereum client for reading permissions contract: %v", err)
+	// }
 
-	files, err := ioutil.ReadDir(filepath.Join(srv.DataDir, "keystore"))
-	if err != nil {
-		srv.log.Trace("Failed to read keystore directory: ", err)
-	}
+	// files, err := ioutil.ReadDir(filepath.Join(srv.DataDir, "keystore"))
+	// if err != nil {
+	// 	srv.log.Trace("Failed to read keystore directory: %v", err)
+	// }
 
-	// (zekun) HACK: here we always use the first key as transactor
-	var keyPath string
-	for _, f := range files {
-		keyPath = f.Name()
-		break
-	}
-	keyBlob, err := ioutil.ReadFile(keyPath)
-	if err != nil {
-		srv.log.Trace("Failed to read key file: ", err)
-	}
-	n := bytes.IndexByte(keyBlob, 0)
-	key := string(keyBlob[:n])
+	// // (zekun) HACK: here we always use the first key as transactor
+	// var keyPath string
+	// for _, f := range files {
+	// 	keyPath = f.Name()
+	// 	break
+	// }
+	// keyBlob, err := ioutil.ReadFile(keyPath)
+	// if err != nil {
+	// 	srv.log.Trace("Failed to read key file: %v", err)
+	// }
+	// n := bytes.IndexByte(keyBlob, 0)
+	// key := string(keyBlob[:n])
 
-	contractAddr := common.HexToAddress("0x0000000000000000000000000000000000000020") // hard coded in genesis
-	permissionsContract, err := permissions.NewPermissions(contractAddr, ipcConn)
-	if err != nil {
-		srv.log.Trace("Failed to instantiate a Permissions contract: ", err)
-	}
-	auth, err := bind.NewTransactor(strings.NewReader(key), "")
-	if err != nil {
-		srv.log.Trace("Failed to create authorized transactor: ", err)
-	}
-	session := &permissions.PermissionsSession{
-		Contract: permissionsContract,
-		CallOpts: bind.CallOpts{
-			Pending: true,
-		},
-		TransactOpts: bind.TransactOpts{
-			From:     auth.From,
-			Signer:   auth.Signer,
-			GasLimit: 3558096384,
-			GasPrice: big.NewInt(0),
-		},
-	}
+	// contractAddr := common.HexToAddress("0x0000000000000000000000000000000000000020") // hard coded in genesis
+	// permissionsContract, err := permissions.NewPermissions(contractAddr, ipcConn)
+	// if err != nil {
+	// 	srv.log.Trace("Failed to instantiate a Permissions contract: %v", err)
+	// }
+	// auth, err := bind.NewTransactor(strings.NewReader(key), "")
+	// if err != nil {
+	// 	srv.log.Trace("Failed to create authorized transactor: %v", err)
+	// }
+	// session := &permissions.PermissionsSession{
+	// 	Contract: permissionsContract,
+	// 	CallOpts: bind.CallOpts{
+	// 		Pending: true,
+	// 	},
+	// 	TransactOpts: bind.TransactOpts{
+	// 		From:     auth.From,
+	// 		Signer:   auth.Signer,
+	// 		GasLimit: 3558096384,
+	// 		GasPrice: big.NewInt(0),
+	// 	},
+	// }
 
-	nodes := parsePermissionedNodes(srv.DataDir)
-	for _, node := range nodes {
-		enodeID := fmt.Sprintf("%x", node.ID[:])
-		srv.log.Debug("enode id: ", enodeID)
-		tx, err := session.ProposeNode(enodeID, true, true)
-		if err != nil {
-			srv.log.Trace("Failed to propose node: ", err)
-		}
-		srv.log.Debug("Transaction pending: 0x%x\n", tx.Hash())
-	}
+	// nodes := parsePermissionedNodes(srv.DataDir)
+	// for _, node := range nodes {
+	// 	enodeID := fmt.Sprintf("%x", node.ID[:])
+	// 	srv.log.Debug("enode id: %v", enodeID)
+	// 	tx, err := session.ProposeNode(enodeID, true, true)
+	// 	if err != nil {
+	// 		srv.log.Trace("Failed to propose node: %v", err)
+	// 	}
+	// 	srv.log.Debug("Transaction pending: 0x%x\n", tx.Hash())
+	// }
 	//END - QUORUM Permissioning
 
 	// static fields
